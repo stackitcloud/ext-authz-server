@@ -11,5 +11,5 @@ RUN go mod download
 RUN  go build
 
 FROM alpine:3.13.5
-COPY --from=builder /app/grpc-service /app/server
+COPY --from=builder /app/ext-authz-server /app/server
 CMD ["/app/server"]

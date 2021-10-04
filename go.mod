@@ -1,4 +1,4 @@
-module github.com/envoyproxy/envoy/examples/ext_authz/auth/grpc-service
+module github.com/gardener/ext-authz-server
 
 go 1.16
 

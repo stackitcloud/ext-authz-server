@@ -15,11 +15,11 @@ import (
 	envoy_service_auth_v3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
 	"google.golang.org/grpc"
 
-	"github.com/envoyproxy/envoy/examples/ext_authz/auth/grpc-service/pkg/auth"
-	auth_v3 "github.com/envoyproxy/envoy/examples/ext_authz/auth/grpc-service/pkg/auth/v3"
+	"github.com/gardener/ext-authz-server/pkg/auth"
+	auth_v3 "github.com/gardener/ext-authz-server/pkg/auth/v3"
 )
 
-const service auth.Services = `^outbound\|1194\|*vpn-seed-server\..*\.svc\.cluster\.local$`
+const service auth.Services = `^outbound\|1194\|\|vpn-seed-server\..*\.svc\.cluster\.local$`
 
 func main() {
 	port := flag.Int("port", 9001, "gRPC port")

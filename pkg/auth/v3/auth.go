@@ -14,7 +14,7 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/code"
 	"google.golang.org/genproto/googleapis/rpc/status"
 
-	"github.com/envoyproxy/envoy/examples/ext_authz/auth/grpc-service/pkg/auth"
+	"github.com/gardener/ext-authz-server/pkg/auth"
 )
 
 type server struct {
@@ -38,7 +38,7 @@ func (s *server) Check(
 	if len(authorization) > 0 {
 		valid, err := s.services.Check(authorization)
 		if err != nil {
-			log.Printf("request from: %s denied!\n", req.Attributes.Request.Http.Headers["reversed-vpn"])
+			log.Printf("request with header: %s denied!\n", req.Attributes.Request.Http.Headers["reversed-vpn"])
 			return &envoy_service_auth_v3.CheckResponse{
 				Status: &status.Status{
 					Code: int32(code.Code_PERMISSION_DENIED),
@@ -46,7 +46,7 @@ func (s *server) Check(
 			}, err
 		}
 		if valid {
-			log.Printf("request from: %s accepted!\n", req.Attributes.Request.Http.Headers["reversed-vpn"])
+			log.Printf("request with header: %s accepted!\n", req.Attributes.Request.Http.Headers["reversed-vpn"])
 			return &envoy_service_auth_v3.CheckResponse{
 				Status: &status.Status{
 					Code: int32(code.Code_OK),
@@ -55,7 +55,7 @@ func (s *server) Check(
 		}
 	}
 
-	log.Printf("request from: %s denied!\n", req.Attributes.Request.Http.Headers["reversed-vpn"])
+	log.Printf("request with header: %s denied!\n", req.Attributes.Request.Http.Headers["reversed-vpn"])
 	return &envoy_service_auth_v3.CheckResponse{
 		Status: &status.Status{
 			Code: int32(code.Code_PERMISSION_DENIED),
