@@ -1,0 +1,66 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Gardener ext-authz-server
+Upstream-Contact: The Gardener project <gardener@googlegroups.com>
+Source: https://github.com/gardener/ext-authz-server
+# --------------------------------------------------
+# source code
+
+Files:
+  .ci/pipeline_definitions
+  .github/*
+  vendor/modules.txt
+  .gitignore
+  CODEOWNERS
+  go.mod
+  go.sum
+  *.json
+  VERSION
+Copyright: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+License: Apache-2.0
+
+# --------------------------------------------------
+# documentation
+
+Files:
+  *.md
+Copyright: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+License: CC-BY-4.0
+
+# --------------------------------------------------
+# source dependencies
+Files: vendor/github.com/cncf/udpa/go/*
+Copyright: not declared
+License: Apache-2.0
+
+Files: vendor/github.com/envoyproxy/go-control-plane/*
+Copyright: not declared
+License: Apache-2.0
+
+Files: vendor/github.com/envoyproxy/protoc-gen-validate/*
+Copyright: 2019 Envoy Project
+License: Apache-2.0
+
+Files: vendor/github.com/golang/protobuf/*
+Copyright: 2010-2018 The Go Authors
+Copyright: 2008 Google Inc.
+License: BSD-3-Clause
+
+Files: vendor/golang.org/x/net/*
+Copyright: 2009-2018 The Go Authors
+License: BSD-3-Clause
+
+Files: vendor/golang.org/x/sys/*
+Copyright: 2009-2018 The Go Authors
+License: BSD-3-Clause
+
+Files: vendor/golang.org/x/text/*
+Copyright: 2009-2018 The Go Authors
+License: BSD-3-Clause
+
+Files: vendor/google.golang.org/genproto/*
+Copyright: not declared
+License: Apache-2.0
+
+Files: vendor/google.golang.org/grpc/*
+Copyright: 2014-2019 gRPC
+License: Apache-2.0
