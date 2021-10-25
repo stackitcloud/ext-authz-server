@@ -35,30 +35,30 @@ func (s *server) Check(
 	req *envoy_service_auth_v3.CheckRequest) (*envoy_service_auth_v3.CheckResponse, error) {
 	authorization := req.Attributes.Request.Http.Headers["reversed-vpn"]
 
-	if len(authorization) > 0 {
-		valid, err := s.services.Check(authorization)
-		if err != nil {
-			log.Printf("request with header: %s denied!\n", req.Attributes.Request.Http.Headers["reversed-vpn"])
-			return &envoy_service_auth_v3.CheckResponse{
-				Status: &status.Status{
-					Code: int32(code.Code_PERMISSION_DENIED),
-				},
-			}, err
-		}
-		if valid {
-			log.Printf("request with header: %s accepted!\n", req.Attributes.Request.Http.Headers["reversed-vpn"])
-			return &envoy_service_auth_v3.CheckResponse{
-				Status: &status.Status{
-					Code: int32(code.Code_OK),
-				},
-			}, nil
-		}
+	if len(authorization) == 0 {
+		log.Printf("request without header denied!\n")
+		return &envoy_service_auth_v3.CheckResponse{
+			Status: &status.Status{
+				Code: int32(code.Code_PERMISSION_DENIED),
+			},
+		}, nil
 	}
 
-	log.Printf("request with header: %s denied!\n", req.Attributes.Request.Http.Headers["reversed-vpn"])
+	valid, err := s.services.Check(authorization)
+	if err != nil || !valid {
+		log.Printf("request with header: \"%s\" denied!\n", authorization)
+		return &envoy_service_auth_v3.CheckResponse{
+			Status: &status.Status{
+				Code: int32(code.Code_PERMISSION_DENIED),
+			},
+		}, err
+	}
+
+	log.Printf("request with header: \"%s\" accepted!\n", authorization)
 	return &envoy_service_auth_v3.CheckResponse{
 		Status: &status.Status{
-			Code: int32(code.Code_PERMISSION_DENIED),
+			Code: int32(code.Code_OK),
 		},
 	}, nil
+
 }
