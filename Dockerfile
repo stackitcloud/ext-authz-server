@@ -4,12 +4,13 @@
 
 FROM golang:alpine AS builder
 
-RUN apk --no-cache add make
+RUN apk --no-cache add make && \
+    apk add git
 COPY . /app
 WORKDIR /app
 RUN go mod download
-RUN  go build
+RUN go build
 
-FROM alpine:3.13.5
+FROM alpine:3.15.3
 COPY --from=builder /app/ext-authz-server /app/server
 CMD ["/app/server"]

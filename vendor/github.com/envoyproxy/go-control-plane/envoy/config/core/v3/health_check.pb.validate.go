@@ -15,7 +15,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/golang/protobuf/ptypes"
+	"google.golang.org/protobuf/types/known/anypb"
 
 	v3 "github.com/envoyproxy/go-control-plane/envoy/type/v3"
 )
@@ -32,13 +32,10 @@ var (
 	_ = time.Duration(0)
 	_ = (*url.URL)(nil)
 	_ = (*mail.Address)(nil)
-	_ = ptypes.DynamicAny{}
+	_ = anypb.Any{}
 
 	_ = v3.CodecClientType(0)
 )
-
-// define the regex for a UUID once up-front
-var _health_check_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
 // Validate checks the field values on HealthCheck with the rules defined in
 // the proto definition for this message. If any rules are violated, an error
@@ -56,7 +53,7 @@ func (m *HealthCheck) Validate() error {
 	}
 
 	if d := m.GetTimeout(); d != nil {
-		dur, err := ptypes.Duration(d)
+		dur, err := d.AsDuration(), d.CheckValid()
 		if err != nil {
 			return HealthCheckValidationError{
 				field:  "Timeout",
@@ -84,7 +81,7 @@ func (m *HealthCheck) Validate() error {
 	}
 
 	if d := m.GetInterval(); d != nil {
-		dur, err := ptypes.Duration(d)
+		dur, err := d.AsDuration(), d.CheckValid()
 		if err != nil {
 			return HealthCheckValidationError{
 				field:  "Interval",
@@ -181,7 +178,7 @@ func (m *HealthCheck) Validate() error {
 	}
 
 	if d := m.GetNoTrafficInterval(); d != nil {
-		dur, err := ptypes.Duration(d)
+		dur, err := d.AsDuration(), d.CheckValid()
 		if err != nil {
 			return HealthCheckValidationError{
 				field:  "NoTrafficInterval",
@@ -201,8 +198,29 @@ func (m *HealthCheck) Validate() error {
 
 	}
 
+	if d := m.GetNoTrafficHealthyInterval(); d != nil {
+		dur, err := d.AsDuration(), d.CheckValid()
+		if err != nil {
+			return HealthCheckValidationError{
+				field:  "NoTrafficHealthyInterval",
+				reason: "value is not a valid duration",
+				cause:  err,
+			}
+		}
+
+		gt := time.Duration(0*time.Second + 0*time.Nanosecond)
+
+		if dur <= gt {
+			return HealthCheckValidationError{
+				field:  "NoTrafficHealthyInterval",
+				reason: "value must be greater than 0s",
+			}
+		}
+
+	}
+
 	if d := m.GetUnhealthyInterval(); d != nil {
-		dur, err := ptypes.Duration(d)
+		dur, err := d.AsDuration(), d.CheckValid()
 		if err != nil {
 			return HealthCheckValidationError{
 				field:  "UnhealthyInterval",
@@ -223,7 +241,7 @@ func (m *HealthCheck) Validate() error {
 	}
 
 	if d := m.GetUnhealthyEdgeInterval(); d != nil {
-		dur, err := ptypes.Duration(d)
+		dur, err := d.AsDuration(), d.CheckValid()
 		if err != nil {
 			return HealthCheckValidationError{
 				field:  "UnhealthyEdgeInterval",
@@ -244,7 +262,7 @@ func (m *HealthCheck) Validate() error {
 	}
 
 	if d := m.GetHealthyEdgeInterval(); d != nil {
-		dur, err := ptypes.Duration(d)
+		dur, err := d.AsDuration(), d.CheckValid()
 		if err != nil {
 			return HealthCheckValidationError{
 				field:  "HealthyEdgeInterval",
@@ -282,6 +300,16 @@ func (m *HealthCheck) Validate() error {
 		if err := v.Validate(); err != nil {
 			return HealthCheckValidationError{
 				field:  "TlsOptions",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if v, ok := interface{}(m.GetTransportSocketMatchCriteria()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return HealthCheckValidationError{
+				field:  "TransportSocketMatchCriteria",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
@@ -415,10 +443,10 @@ func (m *HealthCheck_Payload) Validate() error {
 
 	case *HealthCheck_Payload_Text:
 
-		if len(m.GetText()) < 1 {
+		if utf8.RuneCountInString(m.GetText()) < 1 {
 			return HealthCheck_PayloadValidationError{
 				field:  "Text",
-				reason: "value length must be at least 1 bytes",
+				reason: "value length must be at least 1 runes",
 			}
 		}
 
@@ -500,12 +528,24 @@ func (m *HealthCheck_HttpHealthCheck) Validate() error {
 		return nil
 	}
 
-	// no validation rules for Host
+	if !_HealthCheck_HttpHealthCheck_Host_Pattern.MatchString(m.GetHost()) {
+		return HealthCheck_HttpHealthCheckValidationError{
+			field:  "Host",
+			reason: "value does not match regex pattern \"^[^\\x00\\n\\r]*$\"",
+		}
+	}
 
-	if len(m.GetPath()) < 1 {
+	if utf8.RuneCountInString(m.GetPath()) < 1 {
 		return HealthCheck_HttpHealthCheckValidationError{
 			field:  "Path",
-			reason: "value length must be at least 1 bytes",
+			reason: "value length must be at least 1 runes",
+		}
+	}
+
+	if !_HealthCheck_HttpHealthCheck_Path_Pattern.MatchString(m.GetPath()) {
+		return HealthCheck_HttpHealthCheckValidationError{
+			field:  "Path",
+			reason: "value does not match regex pattern \"^[^\\x00\\n\\r]*$\"",
 		}
 	}
 
@@ -529,8 +569,6 @@ func (m *HealthCheck_HttpHealthCheck) Validate() error {
 		}
 	}
 
-	// no validation rules for HiddenEnvoyDeprecatedServiceName
-
 	if len(m.GetRequestHeadersToAdd()) > 1000 {
 		return HealthCheck_HttpHealthCheckValidationError{
 			field:  "RequestHeadersToAdd",
@@ -553,7 +591,17 @@ func (m *HealthCheck_HttpHealthCheck) Validate() error {
 
 	}
 
-	// no validation rules for HiddenEnvoyDeprecatedUseHttp2
+	for idx, item := range m.GetRequestHeadersToRemove() {
+		_, _ = idx, item
+
+		if !_HealthCheck_HttpHealthCheck_RequestHeadersToRemove_Pattern.MatchString(item) {
+			return HealthCheck_HttpHealthCheckValidationError{
+				field:  fmt.Sprintf("RequestHeadersToRemove[%v]", idx),
+				reason: "value does not match regex pattern \"^[^\\x00\\n\\r]*$\"",
+			}
+		}
+
+	}
 
 	for idx, item := range m.GetExpectedStatuses() {
 		_, _ = idx, item
@@ -586,6 +634,10 @@ func (m *HealthCheck_HttpHealthCheck) Validate() error {
 			}
 		}
 	}
+
+	// no validation rules for HiddenEnvoyDeprecatedServiceName
+
+	// no validation rules for HiddenEnvoyDeprecatedUseHttp2
 
 	return nil
 }
@@ -646,6 +698,12 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = HealthCheck_HttpHealthCheckValidationError{}
+
+var _HealthCheck_HttpHealthCheck_Host_Pattern = regexp.MustCompile("^[^\x00\n\r]*$")
+
+var _HealthCheck_HttpHealthCheck_Path_Pattern = regexp.MustCompile("^[^\x00\n\r]*$")
+
+var _HealthCheck_HttpHealthCheck_RequestHeadersToRemove_Pattern = regexp.MustCompile("^[^\x00\n\r]*$")
 
 // Validate checks the field values on HealthCheck_TcpHealthCheck with the
 // rules defined in the proto definition for this message. If any rules are
@@ -819,7 +877,12 @@ func (m *HealthCheck_GrpcHealthCheck) Validate() error {
 
 	// no validation rules for ServiceName
 
-	// no validation rules for Authority
+	if !_HealthCheck_GrpcHealthCheck_Authority_Pattern.MatchString(m.GetAuthority()) {
+		return HealthCheck_GrpcHealthCheckValidationError{
+			field:  "Authority",
+			reason: "value does not match regex pattern \"^[^\\x00\\n\\r]*$\"",
+		}
+	}
 
 	return nil
 }
@@ -881,6 +944,8 @@ var _ interface {
 	ErrorName() string
 } = HealthCheck_GrpcHealthCheckValidationError{}
 
+var _HealthCheck_GrpcHealthCheck_Authority_Pattern = regexp.MustCompile("^[^\x00\n\r]*$")
+
 // Validate checks the field values on HealthCheck_CustomHealthCheck with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
@@ -889,26 +954,14 @@ func (m *HealthCheck_CustomHealthCheck) Validate() error {
 		return nil
 	}
 
-	if len(m.GetName()) < 1 {
+	if utf8.RuneCountInString(m.GetName()) < 1 {
 		return HealthCheck_CustomHealthCheckValidationError{
 			field:  "Name",
-			reason: "value length must be at least 1 bytes",
+			reason: "value length must be at least 1 runes",
 		}
 	}
 
 	switch m.ConfigType.(type) {
-
-	case *HealthCheck_CustomHealthCheck_HiddenEnvoyDeprecatedConfig:
-
-		if v, ok := interface{}(m.GetHiddenEnvoyDeprecatedConfig()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return HealthCheck_CustomHealthCheckValidationError{
-					field:  "HiddenEnvoyDeprecatedConfig",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
 
 	case *HealthCheck_CustomHealthCheck_TypedConfig:
 
@@ -916,6 +969,18 @@ func (m *HealthCheck_CustomHealthCheck) Validate() error {
 			if err := v.Validate(); err != nil {
 				return HealthCheck_CustomHealthCheckValidationError{
 					field:  "TypedConfig",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *HealthCheck_CustomHealthCheck_HiddenEnvoyDeprecatedConfig:
+
+		if v, ok := interface{}(m.GetHiddenEnvoyDeprecatedConfig()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return HealthCheck_CustomHealthCheckValidationError{
+					field:  "HiddenEnvoyDeprecatedConfig",
 					reason: "embedded message failed validation",
 					cause:  err,
 				}

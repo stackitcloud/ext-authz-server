@@ -15,7 +15,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/golang/protobuf/ptypes"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 // ensure the imports are used
@@ -30,11 +30,8 @@ var (
 	_ = time.Duration(0)
 	_ = (*url.URL)(nil)
 	_ = (*mail.Address)(nil)
-	_ = ptypes.DynamicAny{}
+	_ = anypb.Any{}
 )
-
-// define the regex for a UUID once up-front
-var _struct_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
 // Validate checks the field values on StructMatcher with the rules defined in
 // the proto definition for this message. If any rules are violated, an error
@@ -152,10 +149,10 @@ func (m *StructMatcher_PathSegment) Validate() error {
 
 	case *StructMatcher_PathSegment_Key:
 
-		if len(m.GetKey()) < 1 {
+		if utf8.RuneCountInString(m.GetKey()) < 1 {
 			return StructMatcher_PathSegmentValidationError{
 				field:  "Key",
-				reason: "value length must be at least 1 bytes",
+				reason: "value length must be at least 1 runes",
 			}
 		}
 
