@@ -15,7 +15,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/golang/protobuf/ptypes"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 // ensure the imports are used
@@ -30,11 +30,8 @@ var (
 	_ = time.Duration(0)
 	_ = (*url.URL)(nil)
 	_ = (*mail.Address)(nil)
-	_ = ptypes.DynamicAny{}
+	_ = anypb.Any{}
 )
-
-// define the regex for a UUID once up-front
-var _config_source_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
 // Validate checks the field values on ApiConfigSource with the rules defined
 // in the proto definition for this message. If any rules are violated, an
@@ -84,7 +81,7 @@ func (m *ApiConfigSource) Validate() error {
 	}
 
 	if d := m.GetRequestTimeout(); d != nil {
-		dur, err := ptypes.Duration(d)
+		dur, err := d.AsDuration(), d.CheckValid()
 		if err != nil {
 			return ApiConfigSourceValidationError{
 				field:  "RequestTimeout",
@@ -248,6 +245,13 @@ func (m *SelfConfigSource) Validate() error {
 		return nil
 	}
 
+	if _, ok := ApiVersion_name[int32(m.GetTransportApiVersion())]; !ok {
+		return SelfConfigSourceValidationError{
+			field:  "TransportApiVersion",
+			reason: "value must be one of the defined enum values",
+		}
+	}
+
 	return nil
 }
 
@@ -399,6 +403,21 @@ var _ interface {
 func (m *ConfigSource) Validate() error {
 	if m == nil {
 		return nil
+	}
+
+	for idx, item := range m.GetAuthorities() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ConfigSourceValidationError{
+					field:  fmt.Sprintf("Authorities[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
 	}
 
 	if v, ok := interface{}(m.GetInitialFetchTimeout()).(interface{ Validate() error }); ok {
