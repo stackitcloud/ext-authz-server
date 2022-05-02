@@ -11,6 +11,6 @@ WORKDIR /app
 RUN go mod download
 RUN go build
 
-FROM alpine:3.15.3
+FROM alpine:3.15.4
 COPY --from=builder /app/ext-authz-server /app/server
 CMD ["/app/server"]
