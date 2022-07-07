@@ -7,6 +7,10 @@ ext-authz-server:
         preprocess:
           'inject-commit-hash'
       publish:
+        oci-builder: docker-buildx
+        platforms:
+        - linux/amd64
+        - linux/arm64
         dockerimages:
           ext-authz-server:
             registry: 'gcr-readwrite'
