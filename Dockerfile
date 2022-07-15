@@ -11,6 +11,8 @@ WORKDIR /app
 RUN go mod download
 RUN go build
 
-FROM alpine:3.15.4
+FROM gcr.io/distroless/static-debian11:nonroot
+WORKDIR /
+
 COPY --from=builder /app/ext-authz-server /app/server
 CMD ["/app/server"]
