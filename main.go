@@ -19,7 +19,7 @@ import (
 	auth_v3 "github.com/gardener/ext-authz-server/pkg/auth/v3"
 )
 
-const service auth.Services = `^outbound\|1194\|\|vpn-seed-server\..*\.svc\.cluster\.local$`
+const service auth.Services = `^outbound\|1194\|\|vpn-seed-server(-[0-4])?\..*\.svc\.cluster\.local$`
 
 func main() {
 	port := flag.Int("port", 9001, "gRPC port")
