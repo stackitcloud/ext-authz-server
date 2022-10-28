@@ -12,6 +12,10 @@ EXTERNAL_AUTHZ_SERVER_IMAGE_TAG        := $(VERSION)
 ext-authz-server-docker-image:
 	@docker build -t $(EXTERNAL_AUTHZ_SERVER_IMAGE_REPOSITORY):$(EXTERNAL_AUTHZ_SERVER_IMAGE_TAG) -f Dockerfile --rm .
 
+.PHONY: test
+test:
+	go test ./pkg/...
+
 .PHONY: docker-images
 docker-images: ext-authz-server-docker-image
 
