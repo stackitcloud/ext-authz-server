@@ -2,18 +2,15 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-FROM golang:alpine AS builder
+FROM golang:1.19.4 AS builder
 
-RUN apk --no-cache add make && \
-    apk add git
 COPY . /app
 WORKDIR /app
 ENV CGO_ENABLED=0
-RUN go mod download
-RUN go build
+RUN go install -mod=vendor
 
 FROM gcr.io/distroless/static-debian11:nonroot
 WORKDIR /
 
-COPY --from=builder /app/ext-authz-server /app/server
+COPY --from=builder /go/bin/ext-authz-server /app/server
 CMD ["/app/server"]
