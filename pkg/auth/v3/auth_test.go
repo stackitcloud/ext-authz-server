@@ -5,8 +5,9 @@ import (
 	"testing"
 
 	envoy_service_auth_v3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
-	"github.com/gardener/ext-authz-server/pkg/auth"
 	"google.golang.org/genproto/googleapis/rpc/code"
+
+	"github.com/gardener/ext-authz-server/pkg/auth"
 )
 
 const service auth.Services = `^outbound\|1194\|\|vpn-seed-server(-[0-4])?\..*\.svc\.cluster\.local$`
