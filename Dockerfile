@@ -7,7 +7,7 @@ FROM golang:1.19.4 AS builder
 COPY . /app
 WORKDIR /app
 ENV CGO_ENABLED=0
-RUN go install -mod=vendor
+RUN go install -mod=vendor ./...
 
 FROM gcr.io/distroless/static-debian11:nonroot
 WORKDIR /
