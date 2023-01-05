@@ -2,6 +2,9 @@ ext-authz-server:
   template: 'default'
   base_definition:
     repo: ~
+    steps:
+      verify:
+        image: 'golang:1.19.2'
     traits:
       version:
         preprocess:
