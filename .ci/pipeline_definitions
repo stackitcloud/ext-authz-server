@@ -4,7 +4,7 @@ ext-authz-server:
     repo: ~
     steps:
       verify:
-        image: 'golang:1.19.2'
+        image: 'golang:1.19.4'
     traits:
       version:
         preprocess:
