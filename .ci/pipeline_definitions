@@ -19,6 +19,15 @@ ext-authz-server:
             registry: 'gcr-readwrite'
             image: 'eu.gcr.io/gardener-project/gardener/ext-authz-server'
             dockerfile: 'Dockerfile'
+            resource_labels:
+            - name: 'gardener.cloud/cve-categorisation'
+              value:
+                network_exposure: 'private'
+                authentication_enforced: false
+                user_interaction: 'gardener-operator'
+                confidentiality_requirement: 'none'
+                integrity_requirement: 'none'
+                availability_requirement: 'high'
   jobs:
     head-update:
       traits:
