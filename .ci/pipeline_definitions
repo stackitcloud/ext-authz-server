@@ -6,6 +6,12 @@ ext-authz-server:
       verify:
         image: 'golang:1.19.4'
     traits:
+      component_descriptor:
+        component_labels:
+        - name: 'cloud.gardener.cnudie/responsibles'
+          value:
+          - type: 'codeowners'
+        retention_policy: 'clean-snapshots'
       version:
         preprocess:
           'inject-commit-hash'
@@ -32,7 +38,6 @@ ext-authz-server:
     head-update:
       traits:
         draft_release: ~
-        component_descriptor: ~
     pull-request:
       traits:
         pull-request: ~
