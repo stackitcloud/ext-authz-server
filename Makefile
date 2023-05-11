@@ -53,7 +53,7 @@ check: $(GOIMPORTS) $(GOLANGCI_LINT)
 	@$(REPO_ROOT)/vendor/github.com/gardener/gardener/hack/check.sh ./cmd/... ./pkg/...
 
 .PHONY: format
-format: $(GOIMPORTS)
+format: $(GOIMPORTS) $(GOIMPORTSREVISER)
 	@$(REPO_ROOT)/vendor/github.com/gardener/gardener/hack/format.sh ./cmd ./pkg
 
 .PHONY: test
