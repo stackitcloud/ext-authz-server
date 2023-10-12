@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-FROM golang:1.20.4 AS builder
+FROM golang:1.21.3 AS builder
 
 COPY . /app
 WORKDIR /app
