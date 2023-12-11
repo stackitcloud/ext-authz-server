@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 VERSION                                := $(shell cat VERSION)
-REGISTRY                               := eu.gcr.io/gardener-project/gardener
+REGISTRY                               := europe-docker.pkg.dev/gardener-project/public/gardener
 PREFIX                                 := ext-authz-server
 EXTERNAL_AUTHZ_SERVER_IMAGE_REPOSITORY := $(REGISTRY)/$(PREFIX)
 EXTERNAL_AUTHZ_SERVER_IMAGE_TAG        := $(VERSION)
