@@ -1,7 +1,5 @@
 ext-authz-server:
-  template: 'default'
   base_definition:
-    repo: ~
     steps:
       verify:
         image: 'golang:1.21.3'
@@ -22,7 +20,6 @@ ext-authz-server:
         - linux/arm64
         dockerimages:
           ext-authz-server:
-            registry: 'gcr-readwrite'
             image: 'eu.gcr.io/gardener-project/gardener/ext-authz-server'
             dockerfile: 'Dockerfile'
             resource_labels:
