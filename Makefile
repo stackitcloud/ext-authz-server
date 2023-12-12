@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 VERSION                                := $(shell cat VERSION)
-REGISTRY                               := eu.gcr.io/gardener-project/gardener
+REGISTRY                               := europe-docker.pkg.dev/gardener-project/public/gardener
 PREFIX                                 := ext-authz-server
 EXTERNAL_AUTHZ_SERVER_IMAGE_REPOSITORY := $(REGISTRY)/$(PREFIX)
 EXTERNAL_AUTHZ_SERVER_IMAGE_TAG        := $(VERSION)
@@ -47,7 +47,7 @@ revendor:
 	@GO111MODULE=on go mod tidy
 	@GO111MODULE=on go mod vendor
 	@chmod +x $(REPO_ROOT)/vendor/github.com/gardener/gardener/hack/*
-	
+
 .PHONY: check
 check: $(GOIMPORTS) $(GOLANGCI_LINT)
 	@$(REPO_ROOT)/vendor/github.com/gardener/gardener/hack/check.sh ./cmd/... ./pkg/...
